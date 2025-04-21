@@ -1,15 +1,29 @@
-name: Daily Monitoring
+name: Daily System Check
 
 on:
   schedule:
-    - cron: '0 8 * * *'  # Thực hiện vào lúc 8 giờ sáng mỗi ngày
+    - cron: '0 1 * * *'  # Mỗi ngày 08:00 sáng giờ VN (UTC+7 = 01:00 UTC)
+  workflow_dispatch:  # Cho phép chạy thủ công
 
 jobs:
-  monitor:
+  run-monitor:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
 
-      - name: Run the monitor script
-        run: python monitor.py
+    steps:
+    - name: Clone repo
+      uses: actions/checkout@v3
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: pip install requests
+
+    - name: Run monitor script
+      env:
+        EMAIL_USER: ${{ secrets.EMAIL_USER }}
+        EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+        EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
+      run: python monitor.py
